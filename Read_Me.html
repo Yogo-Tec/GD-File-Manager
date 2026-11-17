@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Build specification for Local File Manager, an advanced Windows desktop file and creative asset management application.">
+  <title>Local File Manager — Antigravity Build Guide</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --surface-2: #eef2f8;
+      --text: #172033;
+      --muted: #637087;
+      --line: #dce3ee;
+      --accent: #4568e8;
+      --accent-soft: #e9eeff;
+      --green: #16845b;
+      --green-soft: #e6f6ef;
+      --amber: #9a6411;
+      --amber-soft: #fff4dd;
+      --red: #b63b45;
+      --red-soft: #fff0f0;
+      --shadow: 0 12px 34px rgba(25, 40, 75, .08);
+      --radius: 16px;
+      --sidebar: 270px;
+    }
+    [data-theme="dark"] {
+      --bg: #101521;
+      --surface: #192131;
+      --surface-2: #222d40;
+      --text: #edf2fb;
+      --muted: #a4b0c4;
+      --line: #303c50;
+      --accent: #91a7ff;
+      --accent-soft: #27345d;
+      --green: #67d5a5;
+      --green-soft: #183b32;
+      --amber: #f1c16d;
+      --amber-soft: #44351d;
+      --red: #ff9298;
+      --red-soft: #48282e;
+      --shadow: 0 12px 34px rgba(0, 0, 0, .22);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 28px; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font: 15px/1.65 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, pre { font-family: "Cascadia Code", Consolas, monospace; }
+    code { background: var(--surface-2); padding: 2px 6px; border-radius: 6px; font-size: .9em; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--surface) 92%, transparent);
+      border-bottom: 1px solid var(--line); backdrop-filter: blur(14px);
+    }
+    .topbar-inner {
+      max-width: 1440px; margin: auto; padding: 12px 24px; display: flex;
+      align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; letter-spacing: -.02em; }
+    .brand-mark {
+      width: 36px; height: 36px; display: grid; place-items: center; border-radius: 11px;
+      color: white; background: linear-gradient(135deg, #5276f4, #805de8); font-weight: 900;
+    }
+    .actions { display: flex; gap: 8px; align-items: center; }
+    button {
+      border: 1px solid var(--line); background: var(--surface); color: var(--text);
+      padding: 8px 12px; border-radius: 10px; cursor: pointer; font: inherit; font-size: 13px;
+    }
+    button:hover { border-color: var(--accent); }
+    .layout { max-width: 1440px; margin: 28px auto; padding: 0 24px; display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); gap: 26px; }
+    aside {
+      align-self: start; position: sticky; top: 78px; max-height: calc(100vh - 100px);
+      overflow: auto; background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow);
+    }
+    aside h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin: 4px 8px 10px; }
+    nav a { display: block; color: var(--muted); padding: 7px 9px; border-radius: 8px; font-size: 13px; }
+    nav a:hover { color: var(--text); background: var(--surface-2); text-decoration: none; }
+    main { min-width: 0; }
+    .hero {
+      padding: clamp(26px, 5vw, 54px); border-radius: 24px; color: #fff;
+      background: radial-gradient(circle at 85% 15%, rgba(255,255,255,.22), transparent 27%),
+                  linear-gradient(125deg, #253f9c, #536fe0 55%, #7956c9);
+      box-shadow: var(--shadow); margin-bottom: 22px;
+    }
+    .eyebrow { text-transform: uppercase; letter-spacing: .16em; font-size: 11px; font-weight: 800; opacity: .8; }
+    h1 { font-size: clamp(32px, 5vw, 52px); line-height: 1.08; letter-spacing: -.045em; margin: 12px 0; }
+    .hero p { max-width: 780px; color: rgba(255,255,255,.86); font-size: 17px; margin: 0; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+    .pill { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 12px; color: var(--muted); background: var(--surface); }
+    .hero .pill { color: #fff; border-color: rgba(255,255,255,.3); background: rgba(255,255,255,.12); }
+    .callout, .card, section {
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    section { padding: clamp(20px, 3vw, 30px); margin-bottom: 18px; }
+    h2 { margin: 0 0 14px; font-size: 24px; letter-spacing: -.025em; line-height: 1.25; }
+    h3 { margin: 22px 0 8px; font-size: 17px; }
+    p { margin: 8px 0 12px; }
+    .muted { color: var(--muted); }
+    .lead { font-size: 17px; color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+    .card { padding: 16px; box-shadow: none; }
+    .card h3 { margin: 0 0 6px; }
+    .card p { color: var(--muted); margin: 0; font-size: 14px; }
+    .callout { padding: 16px 18px; margin: 14px 0; box-shadow: none; border-left: 4px solid var(--accent); }
+    .callout.success { border-left-color: var(--green); background: var(--green-soft); }
+    .callout.warning { border-left-color: var(--amber); background: var(--amber-soft); }
+    .callout.danger { border-left-color: var(--red); background: var(--red-soft); }
+    ul, ol { padding-left: 22px; }
+    li { margin: 5px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+    th, td { text-align: left; padding: 10px 11px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); background: var(--surface-2); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+    pre {
+      overflow: auto; padding: 17px; border-radius: 12px; background: #111827; color: #e5e7eb;
+      font-size: 12px; line-height: 1.6; border: 1px solid #30394a;
+    }
+    .checklist { list-style: none; padding: 0; }
+    .checklist li { padding-left: 28px; position: relative; }
+    .checklist li::before {
+      content: "□"; position: absolute; left: 2px; top: 0; color: var(--accent); font-weight: 800; font-size: 18px;
+    }
+    .tag { display: inline-block; padding: 3px 8px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 800; }
+    .phase { border-left: 3px solid var(--accent); padding: 2px 0 3px 17px; margin: 18px 0; }
+    .phase h3 { margin: 0 0 5px; }
+    .footer { text-align: center; color: var(--muted); padding: 25px 10px 40px; font-size: 12px; }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      aside { position: static; max-height: none; }
+      nav { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media (max-width: 600px) {
+      .topbar-inner { padding: 10px 14px; }
+      .layout { margin: 16px auto; padding: 0 12px; }
+      .grid { grid-template-columns: 1fr; }
+      .actions .label { display: none; }
+      table { display: block; overflow-x: auto; white-space: nowrap; }
+      section { padding: 18px; }
+    }
+    @media print {
+      :root { --bg: #fff; --surface: #fff; --surface-2: #f3f4f6; --text: #111827; --muted: #4b5563; --line: #d1d5db; }
+      .topbar, aside, .actions { display: none !important; }
+      .layout { display: block; margin: 0; padding: 0; }
+      .hero { color: #111827; background: #e9edff; box-shadow: none; }
+      .hero p { color: #374151; }
+      section, .card { box-shadow: none; break-inside: avoid; }
+      a { color: #111827; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><span class="brand-mark">LF</span><span>Local File Manager <span class="muted">/ Build Guide</span></span></div>
+      <div class="actions">
+        <button onclick="window.print()">Print / Save PDF</button>
+        <button id="themeToggle" aria-label="Toggle color theme">☾ <span class="label">Theme</span></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <h2>Contents</h2>
+      <nav>
+        <a href="#start">Start here</a>
+        <a href="#vision">Product vision</a>
+        <a href="#stack">Technology stack</a>
+        <a href="#modules">Feature modules</a>
+        <a href="#designer">Designer tools</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#database">Database</a>
+        <a href="#filesystem">Filesystem rules</a>
+        <a href="#safety">Safety & privacy</a>
+        <a href="#performance">Performance</a>
+        <a href="#ui">UI / UX</a>
+        <a href="#roadmap">Build roadmap</a>
+        <a href="#testing">Testing</a>
+        <a href="#acceptance">Acceptance criteria</a>
+        <a href="#agent">Instructions for Antigravity</a>
+      </nav>
+    </aside>
+
+    <main>
+      <div class="hero" id="start">
+        <div class="eyebrow">Product requirements · Advanced edition</div>
+        <h1>Local File Manager</h1>
+        <p>A Windows desktop file manager and creative asset workspace for graphic designers. Build a real, reliable application that works directly with the user's local filesystem.</p>
+        <div class="hero-meta">
+          <span class="pill">Windows 10 / 11</span>
+          <span class="pill">Tauri 2</span>
+          <span class="pill">React + TypeScript</span>
+          <span class="pill">Rust + SQLite</span>
+          <span class="pill">Offline-first</span>
+        </div>
+      </div>
+
+      <div class="callout success">
+        <strong>Primary product decision:</strong> This is an advanced file manager with a strong graphic-designer asset-management focus. Build the real filesystem engine and dependable core workflows first. AI, MCP, ChatGPT, Gemini and voice are explicitly deferred until the core application is stable.
+      </div>
+
+      <section id="vision">
+        <h2>1. Product vision</h2>
+        <p class="lead">Create a professional Windows desktop application that gives creative professionals fast, safe and organized control over files, folders, drives and design assets.</p>
+        <div class="grid">
+          <div class="card"><h3>Real file management</h3><p>Browse, scan, search, copy, move, rename and organize actual Windows files and folders.</p></div>
+          <div class="card"><h3>Creative asset workflow</h3><p>Preview, inspect, tag, compare and collect images, fonts, vectors and design documents.</p></div>
+          <div class="card"><h3>Reliable operations</h3><p>Preview bulk changes, detect conflicts, show progress and maintain an operation journal.</p></div>
+          <div class="card"><h3>Offline-first</h3><p>Normal file management must work without an internet connection or cloud account.</p></div>
+        </div>
+      </section>
+
+      <section id="stack">
+        <h2>2. Technology stack</h2>
+        <table>
+          <tr><th>Layer</th><th>Technology / requirement</th></tr>
+          <tr><td>Desktop framework</td><td>Tauri 2</td></tr>
+          <tr><td>Frontend</td><td>React + TypeScript + Vite</td></tr>
+          <tr><td>Styling</td><td>Tailwind CSS and reusable accessible components</td></tr>
+          <tr><td>Backend</td><td>Rust, organized into independent modules</td></tr>
+          <tr><td>Async work</td><td>Tokio or an appropriate bounded background-task architecture</td></tr>
+          <tr><td>Database</td><td>SQLite with versioned migrations</td></tr>
+          <tr><td>Search</td><td>SQLite FTS5 and indexed metadata</td></tr>
+          <tr><td>Logging</td><td>Structured application logging, e.g. tracing</td></tr>
+          <tr><td>Testing</td><td>Rust tests, Vitest, React Testing Library and Windows integration tests</td></tr>
+          <tr><td>Packaging</td><td>Tauri Windows installer; code signing when credentials are available</td></tr>
+        </table>
+        <p><strong>Implementation rule:</strong> Prefer maintained, compatible libraries. Check licenses, Windows support and format limitations before selecting dependencies. Do not add unnecessary dependencies.</p>
+      </section>
+
+      <section id="modules">
+        <h2>3. Functional modules</h2>
+        <h3>3.1 Dashboard and storage analytics</h3>
+        <ul>
+          <li>Detected drives, capacity, used space and free space.</li>
+          <li>Indexed file count, folder count and total indexed size.</li>
+          <li>File-type distribution, largest files and largest folders.</li>
+          <li>Recent files, recently modified files, favorites and recent operations.</li>
+          <li>Scan status, progress and error summaries.</li>
+          <li>Storage charts and folder-size visualization.</li>
+        </ul>
+
+        <h3>3.2 Drive and folder scanner</h3>
+        <ul>
+          <li>Scan selected folders, complete drives and multiple drives recursively.</li>
+          <li>Incremental scanning, pause, resume and cancel.</li>
+          <li>Configurable folder and extension exclusions.</li>
+          <li>File/folder counts, sizes, extensions, timestamps and attributes.</li>
+          <li>Handle inaccessible files, permission errors, removable drives and locked files gracefully.</li>
+          <li>Persist scan sessions and report skipped paths and errors.</li>
+          <li>Use filesystem notifications where practical, plus periodic reconciliation scans.</li>
+        </ul>
+
+        <h3>3.3 Professional file explorer</h3>
+        <ul>
+          <li>Grid, detailed list and compact list views.</li>
+          <li>Dual-pane navigation and folder tree.</li>
+          <li>Breadcrumbs, back, forward, up and quick access.</li>
+          <li>Real drag-and-drop, multi-selection and context menus.</li>
+          <li>Copy, cut, paste, move, create folder, rename and delete.</li>
+          <li>Sort and configurable columns; show hidden files and extensions.</li>
+          <li>Open with the default Windows application and view file properties.</li>
+          <li>Virtualize large result lists; never render millions of rows at once.</li>
+        </ul>
+
+        <h3>3.4 Advanced search and filters</h3>
+        <ul>
+          <li>Search by filename, extension, file type, location, size and dates.</li>
+          <li>Search extracted text in supported formats.</li>
+          <li>Search image dimensions, resolution, metadata and tags when indexed.</li>
+          <li>Operators: AND, OR, NOT, contains, starts with, ends with, equals, greater/less than, between, regex and fuzzy matching.</li>
+          <li>Nested visual rule builder, saved searches and search history.</li>
+          <li>Clearly indicate whether a result is indexed, unavailable or unsupported for content search.</li>
+        </ul>
+
+        <h3>3.5 Bulk rename</h3>
+        <ul>
+          <li>Prefix, suffix, replacement, removal and case conversion.</li>
+          <li>Sequential numbering, configurable start and zero padding.</li>
+          <li>Date-based and custom filename patterns.</li>
+          <li>Regular expressions and extension handling.</li>
+          <li>Show old and proposed names before execution.</li>
+          <li>Validate collisions, invalid Windows characters, path limits and stale file references.</li>
+        </ul>
+
+        <h3>3.6 Smart organizer</h3>
+        <ul>
+          <li>Rules based on extension, type, dates, dimensions, metadata and filename patterns.</li>
+          <li>Nested AND/OR/NOT rule groups.</li>
+          <li>Custom destination and folder templates.</li>
+          <li>Copy or move mode, dry-run preview and conflict handling.</li>
+          <li>Per-file results, cancellation and operation report.</li>
+        </ul>
+
+        <h3>3.7 Shortlists and collections</h3>
+        <ul>
+          <li>Multiple named collections containing references to real source files.</li>
+          <li>Add results from different folders and drives.</li>
+          <li>Remove entries, preview assets and detect repeated entries.</li>
+          <li>Copy selected files to a destination, preserving folder structure or flattening it.</li>
+          <li>Export a collection manifest with original locations.</li>
+          <li>Report missing or changed source files; do not fabricate replacement files.</li>
+        </ul>
+
+        <h3>3.8 Duplicate finder</h3>
+        <ul>
+          <li>Exact duplicate detection using SHA-256 after a file-size pre-filter.</li>
+          <li>Similar-image detection using perceptual hashing and a configurable threshold.</li>
+          <li>Group results and provide side-by-side comparison.</li>
+          <li>Show original locations, sizes and image dimensions.</li>
+          <li>Offer selection suggestions but never auto-delete.</li>
+          <li>Use Recycle Bin for supported deletion and require explicit confirmation.</li>
+        </ul>
+
+        <h3>3.9 Preview and file inspection</h3>
+        <ul>
+          <li>Images: JPG, JPEG, PNG, WebP, BMP, GIF and compatible TIFF.</li>
+          <li>Vectors/documents: SVG, PDF and compatible EPS/AI/PSD preview paths.</li>
+          <li>Text: TXT, MD and CSV; compatible DOCX preview if a suitable renderer is available.</li>
+          <li>Optional video preview for supported MP4/MOV codecs.</li>
+          <li>Zoom, pan, rotate, fit-to-screen, full-screen and multi-file navigation.</li>
+          <li>Contact sheets, image comparison and metadata inspector.</li>
+          <li>Preview support must be documented separately from conversion support.</li>
+        </ul>
+
+        <h3>3.10 Batch conversion and processing</h3>
+        <ul>
+          <li>Compatible image conversions: JPG, PNG, WebP, BMP and TIFF as supported.</li>
+          <li>SVG rasterization and PDF-to-image only with tested compatible libraries.</li>
+          <li>Batch resizing, compression, aspect-ratio preservation and watermarking.</li>
+          <li>Output naming rules, output directory, progress and per-file error reports.</li>
+          <li>Preserve original files by default; overwrite only after explicit confirmation.</li>
+          <li>Do not claim proprietary design-format conversion unless a compatible converter is actually integrated and tested.</li>
+        </ul>
+
+        <h3>3.11 History, favorites and settings</h3>
+        <ul>
+          <li>Persistent history for copy, move, rename, delete, conversion, organizer and scan jobs.</li>
+          <li>Undo/recovery actions only when safe and technically possible.</li>
+          <li>Favorite files/folders, pinned locations, recent locations and saved searches.</li>
+          <li>Dark, light and system themes; accent color and explorer preferences.</li>
+          <li>Scan exclusions, cache controls, database backup, diagnostics and privacy settings.</li>
+        </ul>
+      </section>
+
+      <section id="designer">
+        <h2>4. Designer-focused asset management</h2>
+        <p>This is the product's primary differentiator. Prioritize these workflows after the filesystem, scanner and explorer are stable.</p>
+        <div class="grid">
+          <div class="card"><h3>Metadata manager</h3><p>Read supported EXIF, IPTC and XMP metadata; keywords, descriptions, copyright and custom tags. Preserve unsupported metadata rather than silently discarding it.</p></div>
+          <div class="card"><h3>Color palette extractor</h3><p>Extract dominant colors and expose HEX, RGB and HSL values. Allow copying and saving palettes to collections.</p></div>
+          <div class="card"><h3>Font discovery</h3><p>Detect TTF and OTF files, display family metadata and previews, and open fonts with the Windows font viewer. Do not install fonts without a separate explicit user action.</p></div>
+          <div class="card"><h3>Asset collections</h3><p>Organize logos, icons, illustrations, textures, mockups, brushes, templates, stock images and UI components using editable tags and collections.</p></div>
+          <div class="card"><h3>Image inspector</h3><p>Show dimensions, aspect ratio, DPI when available, color mode, transparency and embedded color profile.</p></div>
+          <div class="card"><h3>Creative comparison</h3><p>Compare two images or design exports side by side with zoom and dimensions visible.</p></div>
+        </div>
+      </section>
+
+      <section id="architecture">
+        <h2>5. Architecture and code organization</h2>
+        <p>Use a modular frontend and Rust backend. Keep filesystem access in Rust. The React UI must call narrowly scoped commands through Tauri and receive progress through typed events.</p>
+        <pre>local-file-manager/
+├── src/
+│   ├── app/
+│   ├── components/
+│   │   ├── common/
+│   │   ├── explorer/
+│   │   ├── preview/
+│   │   ├── search/
+│   │   └── dashboard/
+│   ├── features/
+│   │   ├── scanner/
+│   │   ├── organizer/
+│   │   ├── bulk-rename/
+│   │   ├── duplicates/
+│   │   ├── collections/
+│   │   ├── conversion/
+│   │   └── asset-management/
+│   ├── hooks/
+│   ├── services/
+│   ├── stores/
+│   ├── types/
+│   └── styles/
+├── src-tauri/
+│   ├── src/
+│   │   ├── commands/
+│   │   ├── filesystem/
+│   │   ├── scanner/
+│   │   ├── search/
+│   │   ├── operations/
+│   │   ├── organizer/
+│   │   ├── converter/
+│   │   ├── preview/
+│   │   ├── duplicates/
+│   │   ├── database/
+│   │   └── jobs/
+│   ├── migrations/
+│   ├── capabilities/
+│   └── Cargo.toml
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── windows/
+└── documentation/</pre>
+        <p>Adapt the structure when justified, but preserve clear module boundaries and ownership.</p>
+      </section>
+
+      <section id="database">
+        <h2>6. SQLite database design</h2>
+        <table>
+          <tr><th>Table</th><th>Purpose</th></tr>
+          <tr><td>drives</td><td>Drive identity, type, capacity and scan status.</td></tr>
+          <tr><td>folders</td><td>Indexed folder paths, parent relationships and metadata.</td></tr>
+          <tr><td>files</td><td>Indexed file paths, names, sizes, timestamps and file identity data.</td></tr>
+          <tr><td>file_metadata</td><td>Extended format-specific metadata.</td></tr>
+          <tr><td>tags / file_tags</td><td>Custom tags and file-to-tag relationships.</td></tr>
+          <tr><td>collections / collection_items</td><td>Named collections and references to source files.</td></tr>
+          <tr><td>saved_searches</td><td>Serialized, validated search definitions.</td></tr>
+          <tr><td>scan_sessions</td><td>Scan history, progress and errors.</td></tr>
+          <tr><td>operation_jobs</td><td>Background job state and progress.</td></tr>
+          <tr><td>operation_items</td><td>Per-file source, destination and outcome records.</td></tr>
+          <tr><td>operation_logs</td><td>Persistent operation events and error details.</td></tr>
+          <tr><td>thumbnails</td><td>Thumbnail cache keys and file references.</td></tr>
+          <tr><td>duplicate_groups</td><td>Exact and similar duplicate groups.</td></tr>
+          <tr><td>settings</td><td>User preferences and application configuration.</td></tr>
+        </table>
+        <div class="callout warning"><strong>Index integrity:</strong> The real filesystem is the source of truth. SQLite metadata can become stale. Revalidate file existence, identity and relevant timestamps before operations. Use migrations, transactions, indexes, foreign keys and an appropriate backup strategy.</div>
+      </section>
+
+      <section id="filesystem">
+        <h2>7. Real filesystem operation contract</h2>
+        <p>All filesystem reads and mutations must be implemented in Rust using actual Windows paths and filesystem APIs. The frontend must never simulate a successful operation or directly access arbitrary paths.</p>
+        <ol>
+          <li>Receive a typed request and validate its operation type.</li>
+          <li>Validate source and destination paths, permissions and path relationships.</li>
+          <li>Check available disk space where relevant, conflicts and file identity.</li>
+          <li>Generate a complete preflight preview.</li>
+          <li>Obtain explicit user approval for the proposed operation.</li>
+          <li>Revalidate immediately before execution to handle changes since preview.</li>
+          <li>Run in a cancellable, bounded background job.</li>
+          <li>Report per-file progress, errors and partial completion.</li>
+          <li>Verify results and persist the operation journal.</li>
+        </ol>
+        <h3>Windows-specific requirements</h3>
+        <ul>
+          <li>Support Unicode filenames and long paths within Windows and dependency constraints.</li>
+          <li>Handle NTFS, removable drives and other supported Windows filesystems gracefully.</li>
+          <li>Handle permissions, locked files, junctions and symbolic links safely.</li>
+          <li>Detect source/destination overlap and prevent recursive copy or move operations.</li>
+          <li>Use Windows Recycle Bin integration for supported deletions.</li>
+          <li>Do not request administrator privileges for ordinary operations.</li>
+          <li>Do not follow links outside an approved operation scope without explicit policy and validation.</li>
+        </ul>
+      </section>
+
+      <section id="safety">
+        <h2>8. Safety, recovery and privacy</h2>
+        <h3>Conflict resolution</h3>
+        <p>Provide Skip, Replace (explicit confirmation), Auto-rename, Manual rename and Cancel. Recheck conflicts at execution time; a preview is not a guarantee that the filesystem remains unchanged.</p>
+        <h3>Rollback limitations</h3>
+        <table>
+          <tr><th>Operation</th><th>Recovery approach</th></tr>
+          <tr><td>Rename</td><td>Restore prior name if the original path is available and safe.</td></tr>
+          <tr><td>Move</td><td>Move back only if the recorded destination still matches and the source can be restored.</td></tr>
+          <tr><td>Copy</td><td>Remove only verified copies created by the operation, after checking they have not been modified.</td></tr>
+          <tr><td>Delete</td><td>Use Recycle Bin where supported; permanent deletion cannot be reliably undone without backup.</td></tr>
+          <tr><td>Conversion</td><td>Preserve original; remove generated output only after validating its identity.</td></tr>
+          <tr><td>Metadata edit</td><td>Restore only if previous metadata was captured and the format supports safe restoration.</td></tr>
+        </table>
+        <h3>Privacy and security</h3>
+        <ul>
+          <li>No mandatory account, cloud storage or internet connection.</li>
+          <li>Use least-privilege Tauri capabilities and narrowly scoped backend commands.</li>
+          <li>Validate paths and guard against path traversal and unsafe link handling.</li>
+          <li>Do not send filenames, paths, metadata, thumbnails or file content to AI services without explicit informed permission.</li>
+          <li>Provide a clear AI data-sharing preview and a global AI disable option when AI is later introduced.</li>
+          <li>Keep secrets out of source code, logs and frontend bundles.</li>
+        </ul>
+      </section>
+
+      <section id="performance">
+        <h2>9. Performance and scalability</h2>
+        <ul>
+          <li>Support large drives and very large directory trees using streaming traversal and bounded queues.</li>
+          <li>Use cursor-based or paginated queries and virtualized frontend lists.</li>
+          <li>Generate thumbnails asynchronously and cache them on disk.</li>
+          <li>Use thumbnail sizes appropriate to the UI; do not decode full-resolution images for grid cells.</li>
+          <li>Use incremental indexing and batched database writes.</li>
+          <li>Use FTS5 and appropriate indexes for search.</li>
+          <li>Bound concurrent hashing, preview generation and conversion according to hardware and drive type.</li>
+          <li>Support cancellation for all long-running jobs.</li>
+          <li>Keep the UI responsive and expose progress, pause/resume where supported, and clear error states.</li>
+          <li>Handle removable drives disappearing during scans or operations.</li>
+          <li>Measure performance on representative SSD, HDD and large-library test datasets; do not promise universal scan speeds.</li>
+        </ul>
+      </section>
+
+      <section id="ui">
+        <h2>10. UI / UX design system</h2>
+        <p>Build a premium, professional creative-tool interface rather than a generic file explorer. Keep it information-rich but uncluttered.</p>
+        <div class="grid">
+          <div class="card"><h3>Dark theme</h3><p>Deep charcoal surfaces, layered panels, subtle borders, readable typography and restrained blue/violet accents.</p></div>
+          <div class="card"><h3>Light theme</h3><p>Soft neutral background, white content panels, subtle gray borders and accessible contrast.</p></div>
+          <div class="card"><h3>Navigation</h3><p>Sidebar, drive tree, breadcrumbs, global search and contextual inspector.</p></div>
+          <div class="card"><h3>Work surfaces</h3><p>Grid/list explorer, dual pane, preview workspace, filter builder and task queue.</p></div>
+        </div>
+        <h3>Main navigation</h3>
+        <ol>
+          <li>Dashboard</li><li>File Explorer</li><li>Advanced Search</li><li>Asset Library</li>
+          <li>Collections</li><li>Duplicate Finder</li><li>Smart Organizer</li><li>Bulk Rename</li>
+          <li>Batch Converter</li><li>Operation History</li><li>Settings</li>
+        </ol>
+        <h3>Interaction requirements</h3>
+        <ul>
+          <li>Keyboard shortcuts, multi-selection and contextual menus.</li>
+          <li>Persistent background task panel and progress notifications.</li>
+          <li>Clear empty, loading, permission-denied, unsupported-format and error states.</li>
+          <li>Accessible labels, keyboard focus and adequate contrast.</li>
+          <li>Responsive layout for typical Windows desktop and laptop window sizes.</li>
+          <li>Avoid excessive animations, decorative gradients and oversized cards.</li>
+        </ul>
+      </section>
+
+      <section id="roadmap">
+        <h2>11. Development roadmap</h2>
+        <p>Implement sequentially. Each phase must end with working, tested functionality—not just UI screens.</p>
+        <div class="phase"><span class="tag">PHASE 1 · FOUNDATION</span><h3>Project setup and filesystem engine</h3><p>Tauri setup, React architecture, Rust modules, SQLite migrations, drive detection, real file/folder operations, permission handling, path validation and operation journal foundation.</p><strong>Deliverable:</strong> A working desktop foundation with verified real file operations.</div>
+        <div class="phase"><span class="tag">PHASE 2 · SCANNING</span><h3>Scanner and indexing</h3><p>Recursive scanning, incremental indexing, exclusions, statistics, background jobs, progress, cancellation and scan history.</p><strong>Deliverable:</strong> Real local storage scanner and indexed metadata.</div>
+        <div class="phase"><span class="tag">PHASE 3 · DISCOVERY</span><h3>Explorer, preview and search</h3><p>Grid/list/dual-pane explorer, virtualized results, thumbnail cache, advanced search, FTS5, nested filters and saved searches.</p><strong>Deliverable:</strong> Functional file discovery workspace.</div>
+        <div class="phase"><span class="tag">PHASE 4 · ORGANIZATION</span><h3>Rename, organizer and collections</h3><p>Bulk rename preview, smart rules, dry-run, conflict resolution, shortlists, collections and favorites.</p><strong>Deliverable:</strong> Complete organization toolkit.</div>
+        <div class="phase"><span class="tag">PHASE 5 · DESIGNER WORKFLOWS</span><h3>Creative asset management</h3><p>Image and document previews, metadata, color extraction, font discovery, contact sheets and image comparison.</p><strong>Deliverable:</strong> Designer-focused asset manager.</div>
+        <div class="phase"><span class="tag">PHASE 6 · PROCESSING</span><h3>Duplicates and batch conversion</h3><p>Exact and similar image detection, supported conversions, resize, compression, watermarking and storage analytics.</p><strong>Deliverable:</strong> Advanced processing suite.</div>
+        <div class="phase"><span class="tag">PHASE 7 · RELEASE</span><h3>Stability and packaging</h3><p>Crash recovery, rollback validation, performance tuning, Windows integration tests, diagnostics, installer and update mechanism.</p><strong>Deliverable:</strong> Production-ready advanced release candidate.</div>
+        <div class="callout">Future extension after core stability: MCP, ChatGPT, Gemini, voice recognition, text-to-speech and permission-controlled AI actions. Do not make these dependencies of the core application.</div>
+      </section>
+
+      <section id="testing">
+        <h2>12. Testing and quality assurance</h2>
+        <ul>
+          <li>Rust unit tests for path validation, scanner logic, operation planning and recovery rules.</li>
+          <li>React component and interaction tests.</li>
+          <li>Windows integration tests against temporary real directories and files.</li>
+          <li>Test nested folders, Unicode names, long paths and inaccessible directories.</li>
+          <li>Test locked files, removable drives and permission-denied cases.</li>
+          <li>Test name conflicts, source/destination overlap and stale previews.</li>
+          <li>Test partial failures, cancellation and application restart during jobs.</li>
+          <li>Test hash correctness and duplicate grouping.</li>
+          <li>Test conversion output and verify source preservation.</li>
+          <li>Test thumbnail cache invalidation after file changes.</li>
+          <li>Test large directories and bounded memory/worker behavior.</li>
+          <li>Test offline functionality and confirm no unauthorized network transmission.</li>
+        </ul>
+      </section>
+
+      <section id="acceptance">
+        <h2>13. Release acceptance checklist</h2>
+        <ul class="checklist">
+          <li>All core operations affect actual Windows files and folders.</li>
+          <li>Recursive scanning and accurate indexed statistics work.</li>
+          <li>Incremental scans and exclusions work.</li>
+          <li>Explorer grid, list and dual-pane workflows work.</li>
+          <li>Search and nested filters return verified results.</li>
+          <li>Bulk rename has a complete preflight preview.</li>
+          <li>Organizer has dry-run, conflict handling and per-file results.</li>
+          <li>Collections reference real source files and report missing items.</li>
+          <li>Supported previews work and unsupported formats are clearly reported.</li>
+          <li>Exact duplicate detection uses verified content hashes.</li>
+          <li>Conversion preserves originals by default.</li>
+          <li>History persists after restart.</li>
+          <li>Recovery behavior is tested and rollback limitations are disclosed.</li>
+          <li>Long-running work does not freeze the UI.</li>
+          <li>Normal file management works offline.</li>
+          <li>No fake filesystem operations or hardcoded demo success states remain in production paths.</li>
+          <li>Windows installer and release documentation are available.</li>
+        </ul>
+      </section>
+
+      <section id="agent">
+        <h2>14. Instructions for Antigravity AI</h2>
+        <div class="callout success"><strong>Build this as a real application, not a mockup.</strong> Use this document as the product requirements source of truth.</div>
+        <ol>
+          <li>First inspect the existing workspace and identify whether a project already exists. Preserve useful existing work.</li>
+          <li>Before coding, propose a concise implementation plan, module boundaries, dependency choices and database schema. Identify any format-support limitations.</li>
+          <li>Implement Phase 1 first. Do not attempt to generate every feature in one giant component or one coding pass.</li>
+          <li>Keep the application buildable after each milestone. Run the relevant tests and fix regressions before moving forward.</li>
+          <li>Implement actual filesystem operations in Rust. Never use mock data to represent successful file operations.</li>
+          <li>Use temporary test directories for automated destructive-operation tests. Never run destructive tests against a user's real data.</li>
+          <li>Use typed frontend/backend interfaces and typed progress events. Keep commands narrowly scoped and validate all inputs in Rust.</li>
+          <li>Implement previews, preflight validation, conflict handling, cancellation and operation logging before enabling bulk mutations.</li>
+          <li>Do not claim support for PSD, AI, EPS, DOCX, video or other formats until the chosen renderer or converter has been integrated and tested.</li>
+          <li>Keep AI, MCP, cloud and voice features deferred. They must not block or compromise offline core functionality.</li>
+          <li>Document setup, development commands, tests, architecture, dependencies, known limitations and Windows packaging.</li>
+          <li>At the end of every phase, report completed functionality, files/modules changed, tests run, test results, known limitations and the next milestone.</li>
+        </ol>
+        <h3>First task for the coding agent</h3>
+        <p>Inspect the workspace, create or refine the Tauri 2 + React + TypeScript + Rust project foundation, define the SQLite migration strategy and implement a small, fully tested Rust filesystem service for listing directories, reading metadata, creating folders, copying, moving and renaming files. Add safe temporary-directory integration tests. Do not begin bulk destructive operations until preflight validation, conflict handling and operation logging are in place.</p>
+      </section>
+
+      <div class="footer">
+        Local File Manager · Advanced Edition · Product Requirements and Antigravity Build Guide<br>
+        Treat this document as the project specification. Update it when an engineering decision changes scope or compatibility.
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const toggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('lfm-theme');
+    if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+    toggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('lfm-theme', next);
+    });
+  </script>
+</body>
+</html>
